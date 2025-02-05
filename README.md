@@ -21,11 +21,10 @@ $ npm run dev
 - Node.js
 - Express.js
 - Handlebars
-- Socket.io
 - Nodemon
-- Moment.js
-- SweetAlert2
-- Multer
+- JWT
+- MongoDB
+- Passport
 
 # Course information
 
