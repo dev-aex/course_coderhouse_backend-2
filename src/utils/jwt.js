@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = "misupersecretosuperescondido";
 
 export const generateToken = (user) => {
-  return jwt.sign({ user }, JWT_SECRET, { expiresIn: "15m" });
+  return jwt.sign({ user }, JWT_SECRET, { expiresIn: "5m" });
 };
 
 export const verifyToken = (token) => {

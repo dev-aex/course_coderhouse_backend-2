@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { generateToken } from "../utils/jwt.js";
+import passport from "passport";
+import usersModel from "../models/user.model.js";
 
 const ROUTER = Router();
 
@@ -9,21 +10,13 @@ ROUTER.get("/", (req, res) => {
 });
 
 // LOGIN
-router.post("/login", (req, res) => {
-  const { email, password } = req.body;
-  const userFound = users.find(function (user) {
-    return user.email === email && user.password === password;
-  });
+ROUTER.get("/login", (req, res) => {
+  res.render("login", { title: "LogIn" });
+});
 
-  const user = { ...userFound };
-  delete user.password;
-
-  if (!userFound) return res.status(401).send("Invalid credentials");
-
-  let token = generateToken(user);
-  res
-    .cookie("authCookie", token, { maxAge: 60 * 60 * 1000, httpOnly: true })
-    .send({ message: "Login exitoso" });
+// REGISTER
+ROUTER.get("/register", (req, res) => {
+  res.render("register", { title: "Register" });
 });
 
 export default ROUTER;

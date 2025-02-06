@@ -1,44 +1,77 @@
 import passport from "passport";
-import { Strategy, ExtractJwt } from "passport-jwt";
+import local from "passport-local";
+import jwt from "passport-jwt";
+import { generateHash } from "../utils/bcrypt.js";
+import userModel from "../models/user.model.js";
+import { generateToken } from "../utils/jwt.js";
+
+const JwtStratgy = jwt.Strategy;
+const extractJwt = jwt.ExtractJwt;
+const LocalStrategy = local.Strategy;
 
 const initializePassport = () => {
   passport.use(
-    "register",
-    new LocalStrategy(
+    "current",
+    new JwtStratgy(
       {
-        passReqToCallback: true,
-        usernameField: "email",
+        jwtFromRequest: extractJwt.fromExtractors([cookieExtractor]),
+        secretOrKey: "clave-secreta",
       },
-      async (req, username, password, done) => {
-        const { first_name, last_name, email } = req.body;
+      async (jwt_payload, done) => {
         try {
-          const userFound = await userModel.findOne({ email: username }); //email:usernaem = email: email
-          if (userFound) {
-            console.log("Usuario ya existe");
-            return done(null, false);
-          }
-          const newUser = {
-            first_name,
-            last_name,
-            email,
-            password: createHash(password),
-          };
-          const user = await userModel.create(newUser);
-
-          return done(null, user);
+          return done(null, jwt_payload);
         } catch (error) {
-          return done(`error al crear el usuario ${error}`, false);
+          return done(error);
         }
       }
     )
   );
 };
 
-// EXTRACTOR
+passport.use(
+  "register",
+  new LocalStrategy(
+    {
+      passReqToCallback: true,
+      usernameField: "email",
+    },
+    async (req, username, password, done) => {
+      const { first_name, last_name, email, age } = req.body;
+      try {
+        if (!email) {
+          return done(null, false, { message: "Email is required" });
+        }
+
+        const userFound = await userModel.findOne({ email: username });
+        if (userFound) {
+          return done(null, false, { message: "Email already registered" });
+        }
+
+        const newUser = {
+          first_name: first_name || "",
+          last_name: last_name || "",
+          email,
+          age: age || "",
+          password: generateHash(password),
+        };
+
+        const user = await userModel.create(newUser);
+
+        const token = generateToken(user);
+
+        return done(null, { user, token });
+      } catch (error) {
+        return done(error, false);
+      }
+    }
+  )
+);
+
+// COOKIE EXTRACTOR
 const cookieExtractor = (req) => {
   let token = null;
-  if (req && req.cookies) {
-    token = req.cookies["authCookie"];
+  if (req && req.signedCookies) {
+    token = req.signedCookies["authCookie"];
   }
   return token;
 };

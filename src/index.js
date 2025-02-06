@@ -21,15 +21,15 @@ APP.set("views", "./src/views");
 APP.use(express.json());
 APP.use(express.urlencoded({ extended: true }));
 APP.use(express.static("public"));
-app.use(cookieParser(FIRMA));
+APP.use(cookieParser(FIRMA));
 
 // PASSPORT
 initializePassport();
-app.use(passport.initialize());
+APP.use(passport.initialize());
 
 // ROUTES
 APP.use("/", viewsRoutes);
-app.use("/api/sessions", sessionsRoutes);
+APP.use("/api/sessions", sessionsRoutes);
 
 // DB
 connectDB();
