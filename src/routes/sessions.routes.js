@@ -25,10 +25,22 @@ ROUTER.get(
 // REGISTER
 ROUTER.post(
   "/register",
-  passport.authenticate("register"),
+  passport.authenticate("register", {
+    session: false,
+    successRedirect: "/login",
+    failureRedirect: "/register",
+  }),
   async (req, res) => {
-    res.status(201).json({ status: "success", payload: req.user });
-    redirect("/login");
+    const { user, token } = req.user;
+
+    try {
+      res
+        .cookie("authCookie", token, { httpOnly: true, maxAge: 5 * 60 * 1000 })
+        .status(201)
+        .json({ status: "success", payload: user });
+    } catch (error) {
+      res.status(401).json({ status: "error", message: "User already exist" });
+    }
   }
 );
 
