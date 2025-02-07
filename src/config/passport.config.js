@@ -10,12 +10,13 @@ const extractJwt = jwt.ExtractJwt;
 const LocalStrategy = local.Strategy;
 
 const initializePassport = () => {
+  // CURRENT STRATEGY
   passport.use(
     "current",
     new JwtStratgy(
       {
         jwtFromRequest: extractJwt.fromExtractors([cookieExtractor]),
-        secretOrKey: "clave-secreta",
+        secretOrKey: "misupersecretosuperescondido",
       },
       async (jwt_payload, done) => {
         try {
@@ -28,6 +29,7 @@ const initializePassport = () => {
   );
 };
 
+// REGISTER STRATEGY
 passport.use(
   "register",
   new LocalStrategy(
@@ -70,8 +72,8 @@ passport.use(
 // COOKIE EXTRACTOR
 const cookieExtractor = (req) => {
   let token = null;
-  if (req && req.signedCookies) {
-    token = req.signedCookies["authCookie"];
+  if (req && req.cookies) {
+    token = req.cookies["authCookie"];
   }
   return token;
 };
