@@ -2,6 +2,7 @@ import { Router } from "express";
 import passport from "passport";
 import usersModel from "../models/user.model.js";
 import { generateToken } from "../utils/jwt.js";
+import { isValidPassword } from "../utils/bcrypt.js";
 
 const ROUTER = Router();
 
@@ -11,11 +12,12 @@ ROUTER.get(
   passport.authenticate("current", { session: false }),
   (req, res) => {
     try {
-      res.status(200).json({ status: "success", payload: req.user });
+      const { user } = req.user;
+      res.render("current", { title: "LogIn", user });
     } catch (error) {
       res
         .status(500)
-        .json({ status: "error", message: `Error: ${error.messages}` });
+        .json({ status: "error", message: `Error: ${error.message}` });
     }
   }
 );
@@ -40,16 +42,39 @@ ROUTER.post("/login", async (req, res) => {
     if (!userFound)
       return res.status(404).json({ status: "error", error: "User not found" });
 
+    const isValidPass = isValidPassword(password, userFound.password);
+
+    if (!isValidPass)
+      return res
+        .status(401)
+        .json({ status: "error", message: "Invalid password" });
+
     const user = { ...userFound };
     delete user._doc.password;
 
     let token = generateToken(user);
     res
-      .cookie("authCookie", token, { maxAge: 60 * 60 * 1000, httpOnly: true })
+      .cookie("authCookie", token, { maxAge: 5 * 60 * 1000, httpOnly: true })
       .redirect("/api/sessions/current");
   } catch (error) {
-    res.status(500).send(`Server Error: ${error}`);
+    res.status(500).json({ status: "error", message: error.message });
   }
 });
+
+// LOGOUT
+ROUTER.post(
+  "/logout",
+  passport.authenticate("current", { session: false }),
+  (req, res) => {
+    try {
+      res.clearCookie("authCookie");
+      res.redirect("/login");
+    } catch (error) {
+      res
+        .status(500)
+        .json({ status: "error", message: `Error: ${error.message}` });
+    }
+  }
+);
 
 export default ROUTER;

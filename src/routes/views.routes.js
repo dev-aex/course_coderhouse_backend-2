@@ -1,22 +1,31 @@
 import { Router } from "express";
 import passport from "passport";
-import usersModel from "../models/user.model.js";
 
 const ROUTER = Router();
 
 // HOME
 ROUTER.get("/", (req, res) => {
-  res.render("home", { title: "Home" });
+  res.render("home");
 });
 
 // LOGIN
 ROUTER.get("/login", (req, res) => {
-  res.render("login", { title: "LogIn" });
+  res.render("login");
 });
 
 // REGISTER
 ROUTER.get("/register", (req, res) => {
-  res.render("register", { title: "Register" });
+  res.render("register");
 });
+
+// REGISTER GOOGLE
+ROUTER.get(
+  "/auth/google/callback",
+  passport.authenticate("google", {
+    scope: ["email", "profile"],
+    successRedirect: "/current",
+    failureRedirect: "/login",
+  })
+);
 
 export default ROUTER;

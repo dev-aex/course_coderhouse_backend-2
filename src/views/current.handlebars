@@ -1,11 +1,11 @@
 <h1>{{title}}</h1>
 <div>
-  <p><strong>FIRSTNAME:</strong>{{user.first_name}} </p>
-  <p><strong>LASTNAME:</strong>{{user.last_name}} </p>
-  <p><strong>EMAIL:</strong>{{user.email}} </p>
-  <p><strong>ROLE:</strong>{{user.role}} </p>
+  <p><strong>FIRSTNAME:</strong>{{user._doc.first_name}} </p>
+  <p><strong>LASTNAME:</strong>{{user._doc.last_name}} </p>
+  <p><strong>EMAIL:</strong>{{user._doc.email}} </p>
+  <p><strong>ROLE:</strong>{{user._doc.role}} </p>
 
-  <form action="/logout" method="post">
+  <form action="/api/sessions/logout" method="post">
     <button type="submit">Salir</button>
   </form>
 </div>

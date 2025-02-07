@@ -1,0 +1,54 @@
+/* HOME */
+header {
+  margin-top: 2rem;
+  padding-inline: 6rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.container-links {
+  display: flex;
+  gap: 4rem;
+}
+
+.btn-main {
+  cursor: pointer;
+  padding-block: 0.5rem;
+  padding-inline: 1rem;
+  color: white;
+
+  border-radius: 0.5rem;
+  background-color: #483d8b;
+  text-decoration: none;
+}
+
+.btn-main:hover {
+  background-color: #29234e;
+}
+
+/* LOGIN */
+.container-login {
+  width: fit-content;
+  height: fit-content;
+  margin: 0 auto;
+  margin-top: 6rem;
+  padding-inline: 16rem;
+  padding-block: 6rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3rem;
+  border: 0.5px solid black;
+}
+
+.container-login form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.container-login div {
+  display: flex;
+  flex-direction: column;
+}
