@@ -1,4 +1,5 @@
 import express from "express";
+import env from "./config/env.js";
 import { engine } from "express-handlebars";
 import cookieParser from "cookie-parser";
 import passport from "passport";
@@ -9,8 +10,8 @@ import sessionsRoutes from "./routes/sessions.routes.js";
 
 // SERVER SETTINGS
 const APP = express();
-const PORT = 3000;
-const FIRMA = "misuperfirmasecreta";
+const PORT = env.port || 3000;
+const FIRMA = env.cookie_sign;
 
 // HANDLEBARS SETTINGS
 APP.engine("handlebars", engine());
