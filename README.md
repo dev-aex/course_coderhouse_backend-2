@@ -20,10 +20,12 @@ $ npm run dev
 
 - Node.js
 - Express.js
-- Handlebars
+- Node mailer
+- Cookie Parser
 - Nodemon
 - JWT
-- MongoDB
+- Bcrypt
+- Mongoose
 - Passport
 
 # Course information

@@ -5,6 +5,6 @@ export const generateHash = (password) => {
   return hashSync(password, salt);
 };
 
-export const isValidPassword = (password, passwordHash) => {
+export const compareHash = (password, passwordHash) => {
   return compareSync(password, passwordHash);
 };

@@ -1,15 +1,20 @@
-import { connect } from "mongoose";
-import env from "./env.js";
+import mongoose from "mongoose";
+import env from "./env.config.js";
 
-export const connectDb = async () => {
-  const MONGO_URI = env.mongodb_url;
+const MONGO_URI = env.mongodb_url;
 
-  try {
-    await connect(MONGO_URI);
-    console.log("DB connected");
-  } catch (error) {
-    console.log("Error connecting to DB" + error.message);
+class ConnectMongoDB {
+  static #instance;
+  static async getInstance() {
+    if (!ConnectMongoDB.#instance) {
+      await mongoose.connect(MONGO_URI);
+      ConnectMongoDB.#instance = mongoose.connection;
+      console.log("DB connected");
+    } else {
+      console.log("DB already connected");
+    }
+    return ConnectMongoDB.#instance;
   }
-};
+}
 
-export default connectDb;
+export default ConnectMongoDB;

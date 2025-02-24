@@ -1,90 +1,140 @@
 import { Router } from "express";
 import passport from "passport";
-import usersModel from "../models/user.model.js";
-import { generateToken } from "../utils/jwt.js";
-import { isValidPassword } from "../utils/bcrypt.js";
+import checkAuthRoles from "../middlewares/roles.middleware.js";
+import { level_1 } from "../config/authProfiles.js";
+import cartsController from "../controllers/carts.controller.js";
+import ticketsController from "../controllers/tickets.controller.js";
 
 const ROUTER = Router();
 
-// CURRENT
+// PROFILE
 ROUTER.get(
-  "/current",
+  "/profile",
+  checkAuthRoles(level_1),
   passport.authenticate("current", { session: false }),
+
   (req, res) => {
     try {
       const { user } = req.user;
-      res.render("current", { title: "LogIn", user });
-    } catch (error) {
-      res
-        .status(500)
-        .json({ status: "error", message: `Error: ${error.message}` });
+      res.status(200).json({ status: "success", payload: user });
+    } catch (e) {
+      res.status(500).json({ status: "error", message: e.message });
     }
   }
 );
 
-// REGISTER
-ROUTER.post(
-  "/register",
-  passport.authenticate("register", {
-    session: false,
-    successRedirect: "/login",
-    failureRedirect: "/register",
-  }),
+// GET USER CART
+ROUTER.get(
+  "/mycart",
+  checkAuthRoles(level_1),
+  passport.authenticate("current", { session: false }),
   async (req, res) => {
-    const { user, token } = req.user;
-
     try {
-      res
-        .cookie("authCookie", token, { httpOnly: true, maxAge: 5 * 60 * 1000 })
-        .status(201)
-        .json({ status: "success", payload: user });
-    } catch (error) {
-      res.status(401).json({ status: "error", message: "User already exist" });
+      const { user } = req.user;
+
+      const userCart = await cartsController.findOneByIdPopulate(user.cart);
+
+      res.status(200).json({ status: "success", payload: userCart });
+    } catch (e) {
+      res.status(500).json({ status: "error", message: e.message });
     }
   }
 );
 
-// LOGIN
-ROUTER.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+// ADD PRODUCT TO CART
+ROUTER.post(
+  "/mycart/add/:id",
+  checkAuthRoles(level_1),
+  passport.authenticate("current", { session: false }),
+  async (req, res) => {
+    const productId = req.params.id;
+    try {
+      const { user } = req.user;
 
-  try {
-    const userFound = await usersModel.findOne({ email });
+      const updatedCart = await cartsController.addOneProductToCartById(
+        user.cart,
+        productId
+      );
 
-    if (!userFound)
-      return res.status(404).json({ status: "error", error: "User not found" });
-
-    const isValidPass = isValidPassword(password, userFound.password);
-
-    if (!isValidPass)
-      return res
-        .status(401)
-        .json({ status: "error", message: "Invalid password" });
-
-    const user = { ...userFound };
-    delete user._doc.password;
-
-    let token = generateToken(user);
-    res
-      .cookie("authCookie", token, { maxAge: 5 * 60 * 1000, httpOnly: true })
-      .redirect("/api/sessions/current");
-  } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
+      res.status(200).json({ status: "success", payload: updatedCart });
+    } catch (e) {
+      res.status(500).json({ status: "error", message: e.message });
+    }
   }
-});
+);
+
+// DELETE ALL PRODUCTS ON CART
+ROUTER.delete(
+  "/mycart/delete",
+  checkAuthRoles(level_1),
+  passport.authenticate("current", { session: false }),
+  async (req, res) => {
+    try {
+      const { user } = req.user;
+
+      const updatedCart = await cartsController.deleteAllProductsOnCart(
+        user.cart
+      );
+
+      res.status(200).json({ status: "success", payload: updatedCart });
+    } catch (e) {
+      res.status(500).json({ status: "error", message: e.message });
+    }
+  }
+);
+
+// DELETE ONE PRODUCT ON CART
+ROUTER.delete(
+  "/mycart/delete/:id",
+  checkAuthRoles(level_1),
+  passport.authenticate("current", { session: false }),
+  async (req, res) => {
+    const productId = req.params.id;
+    try {
+      const { user } = req.user;
+
+      const updatedCart = await cartsController.deleteOneProductOnCartById(
+        user.cart,
+        productId
+      );
+
+      res.status(200).json({ status: "success", payload: updatedCart });
+    } catch (e) {
+      res.status(500).json({ status: "error", message: e.message });
+    }
+  }
+);
+
+// PROCESS TICKET
+ROUTER.post(
+  "/purchase",
+  checkAuthRoles(level_1),
+  passport.authenticate("current", { session: false }),
+  async (req, res) => {
+    try {
+      const { user } = req.user;
+
+      const newTicket = await ticketsController.createOne(user.cart);
+
+      res.status(200).json({ status: "success", payload: newTicket });
+    } catch (e) {
+      res.status(500).json({ status: "error", message: e.message });
+    }
+  }
+);
 
 // LOGOUT
 ROUTER.post(
   "/logout",
+  checkAuthRoles(level_1),
   passport.authenticate("current", { session: false }),
   (req, res) => {
     try {
       res.clearCookie("authCookie");
-      res.redirect("/login");
-    } catch (error) {
-      res
-        .status(500)
-        .json({ status: "error", message: `Error: ${error.message}` });
+
+      res.status(200).json({ status: "success" });
+    } catch (e) {
+      res.status(500).json({ status: "error", message: e.message });
     }
   }
 );
