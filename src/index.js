@@ -19,7 +19,6 @@ const SIGN = env.cookie_sign;
 // MIDDLEWARES
 APP.use(express.json());
 APP.use(express.urlencoded({ extended: true }));
-APP.use(express.static("public"));
 APP.use(cookieParser(SIGN));
 
 // PASSPORT
